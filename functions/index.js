@@ -5,9 +5,43 @@
 "use strict";
 const axios = require("axios");
 const functions = require("firebase-functions");
+const {google} = require('googleapis');
 const {WebhookClient} = require("dialogflow-fulfillment");
 const {Card, Suggestion} = require("dialogflow-fulfillment");
 const firebaseAdmin= require("firebase-admin");
+
+const calendarId = "v1plooqmglddptoqjf85im0nmg@group.calendar.google.com"
+ const serviceAccount = {
+  "type": "service_account",
+  "project_id": "botsi-oxrr",
+  "private_key_id": "286a9aaa62528636ac082c1cb8fe1edc48a2b833",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDLJwgTo+Xac7Vu\nEECeAKwDHKNUu0SSmsxEQIJ4U1dB6ZTtvh5+nVZruprznZ2eYOLJlExGu3qZecF+\nDkwzB+ZKR70PSMSthdgdaC2yq6TdcG3LjDGYVJAFOplMO47e1pk3BOXAWKumvyZy\nFGmxfJ7t5kLHFHXTS41Q6A3bXp86rabfiZ2wcHXJMhW6mNfCIZECpv4qxOIQl9QW\nvDcxmQov9vieYVs47zO3/NlW6vwbKYd6iIc5dzLUG4ZIXfXRcC5kKnEsF37tuAUP\n8647KSRoGo3C4UwUEK/jvO8jaO8ECttZkAxVDSKconS8D/thxpB34Od0ORbHgE3p\nhgE/0GvRAgMBAAECggEAC4LbLM25LP8odSObnbhZBtYdFSSFVq9JysZC/lFunNAA\n/dWrga4lovYQaKRyNXK09wodplZiNIcXJS7nN28HqAbXmiGb718pp0TrbffW4CtK\nNWHsv35vKLSw0gZ/6nWLefgfkp4Tn9+t7IHmmUV/9ef5ubEZmg7qY366pkb+y8LI\nStmIJaJn+tEvwblvmuTEpKBca6GUbkS1pwhKslqc53DWd9SYt54XMj+Q2wZt/a3a\ne06BwauZq0jInLelI8gN9vTG1Li1YS4ZekFdYEAfC196h5AWl5jw0CWq/451Opor\no/5XdgKZH0YzuP0PUZj0tIGQ9T5liCN5+F0jw0OyYQKBgQD1sIbDH84toMNPsQ7c\nZAHDUqPexe27GDfE6T+a76b25thhVhsB67pEezhLetfwmKqlgyykLDx5pQok5AP4\nFpC/Muc8kt9ohzOzdDt4Tp/pCvMKh8YoDvgd2mjYmCsMzAQMSG2SBDP3V8kq1dd9\nS4FPQfQY8xtvqjCHi0IQ8r+EyQKBgQDTrYYcfg0yQT0iJOTafwQoLO1M9lVWndm0\nit3dmbdkP8vWaulZQJq72v8BkLSz4eqEi3AUz/z3X6NCeS/7xTM2Ctj8uYN/kpHJ\nBLAiySvV41cEc6B0mGEHtPwLbfI9SAbuE9vjhl/UYb7rlFZ1j/YGRYVMmrx3Vpkm\nyd6Xcm7ayQKBgF8rM+hdZ5YREdbKtQD11CD+3+8pKD8y0Fd8KmEvt7MoFGUP34JM\n92gTeujx+rd9y4w1VZN6dyp/nYBQuqDczNDjPOMf2V46EPLQcUDW4+Z3kVFg6ocV\n1VJrCfXsa7CXTnIblCXdbuu+m3P2RXSJTNuQpqcLdHM6r3WxobPC9CDRAoGAVxTO\n1E/i++as0Kwe3ehc/G4nHX9FckGz+zsZtP103bAFGmuXHdmfDmM0fx9Zx5rMEMUQ\nUe+SoO3eSw1x+QCSZcwmoilreIMCqJDeKSFbgD1rYfBzdSPu3u3MtqL/gchs2Wqg\nDkUMjWG82kuHGgwkaUYWZYJOwEWG8dcgVGuGQUkCgYAhiPjtJSBqWJ3ymWex16Yl\n1VJttH8JNm2zxRiJtjfHHiARtL35HXQhgDWpztwQ59jgZDhnlMQxW7wfjKIqkeb+\nFOeEGyVMXnc3oC7C/M+QWl8eab68U61BbSDCVUAXi3wxtbWe6jZaOKalF0ODp3cj\n/qaJrmQZTS1YZy6qhw7Ong==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-7of04@botsi-oxrr.iam.gserviceaccount.com",
+  "client_id": "100996580076431011253",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-7of04%40botsi-oxrr.iam.gserviceaccount.com"
+}; 
+
+ // Set up Google Calendar Service account credentials
+ const serviceAccountAuth = new google.auth.JWT({
+  email: serviceAccount.client_email,
+  key: serviceAccount.private_key,
+  scopes: 'https://www.googleapis.com/auth/calendar'
+});
+
+const calendar = google.calendar('v3');
+
+
+const timeZone = 'America/Mexico_City';
+const timeZoneOffset = '-06:00';
+
+
+
+
+
+
 process.env.DEBUG = "dialogflow:debug"; // enables lib debugging statements
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //   functions.logger.info("Hello logs!", {structuredData: true});
@@ -63,6 +97,40 @@ exports.dialogflowFirebaseFulfillment =
    // }
    // // See https://github.com/dialogflow/fulfillment-actions-library-nodejs
    // // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
+
+
+
+
+   //Vamos a comenzar con el calendario
+
+   const appointment_type = agent.parameters.AppointmentType
+   function makeAppointment (agent) {
+     // Calculate appointment start and end datetimes (end = +1hr from start)
+     //console.log("Parameters", agent.parameters.date);
+     const dateTimeStart = new Date(Date.parse(agent.parameters.date.split('T')[0] + 'T' + agent.parameters.time.split('T')[1].split('-')[0] + timeZoneOffset));
+     const dateTimeEnd = new Date(new Date(dateTimeStart).setHours(dateTimeStart.getHours() + 1));
+     const appointmentTimeString = dateTimeStart.toLocaleString(
+       'es',
+       { month: 'long', day: 'numeric', hour: 'numeric', timeZone: timeZone }
+     );
+ 
+     // Check the availibility of the time, and make an appointment if there is time on the calendar
+     return createCalendarEvent(dateTimeStart, dateTimeEnd, appointment_type).then(() => {
+       agent.add(`Listo!! te acabo de agendar. ${appointmentTimeString} is fine!.`);
+     }).catch(() => {
+       agent.add(`Lo siento, esa hora ya está apartada ${appointmentTimeString}.`);
+     });
+   }
+
+
+
+
+   //Aqui termina la rutina de lcalendario
+
+
+
+
+
 
    function usuarionuevo(agent) {
      agent.add( "Procesando..." );
@@ -141,7 +209,7 @@ exports.dialogflowFirebaseFulfillment =
      agent.add( "Gracias por interactuar con Botsi, ve a https://alekzen.com/AdminProductos para darle los toques finales." );
    }
 
-   function CalculaCredito(agent) {
+   async function CalculaCredito(agent) {
     // Obtener los parametros dese el intent de Dialogflow
     //  const databaseEntry = agent.parameters.dato;
 
@@ -158,11 +226,11 @@ exports.dialogflowFirebaseFulfillment =
     // Get the database collection 'dialogflow' and document 'agent' and store
     // the document  {entry: "<value of database entry>"} in the 'agent' document
     const dialogflowAgentRef = db.collection(coleccion).doc(documento);
-    return db.runTransaction((t) => {
+    return await db.runTransaction((t) => {
       t.set(dialogflowAgentRef, {Importe: importe, Enganche: enganche, Plazo: plazo, Periodicidad: periodicidad, Tasa: tasa ,Whatsapp : whatsapp});
       return Promise.resolve("Write complete");
     }).then((doc) => {
-      agent.add(`Listo, el credito para "${documento}" se ha guardado en la base de datos.`);
+      agent.add(`Listo, el credito para "${documento}" se ha guardado en la base de datos, puedes revisarlo en https://botsi-oxrr.web.app/admin/CreditosUser/${documento}.`);
     }).catch((err) => {
       console.log(`Error escribiendo en Firestore: ${err}`);
       agent.add(`Error al agregar "${documento}" en la base de datos.`);
@@ -240,9 +308,37 @@ exports.dialogflowFirebaseFulfillment =
    intentMap.set("CalculaCredito", CalculaCredito);
    intentMap.set("Octavio.lozada", octaviolozada);
    intentMap.set("PublicarBlog", PublicarBlog);
+   intentMap.set('Cita', makeAppointment);
 
 
    // intentMap.set('your intent name here', yourFunctionHandler);
    // intentMap.set('your intent name here', googleAssistantHandler);
    agent.handleRequest(intentMap);
  });
+
+ function createCalendarEvent (dateTimeStart, dateTimeEnd, appointment_type) {
+  return new Promise((resolve, reject) => {
+    calendar.events.list({
+      auth: serviceAccountAuth, // List events for time period
+      calendarId: calendarId,
+      timeMin: dateTimeStart.toISOString(),
+      timeMax: dateTimeEnd.toISOString()
+    }, (err, calendarResponse) => {
+      // Check if there is a event already on the Calendar
+      if (err || calendarResponse.data.items.length > 0) {
+        reject(err || new Error('hay conflictos con ese horario'));
+      } else {
+        // Create event for the requested time period
+        calendar.events.insert({ auth: serviceAccountAuth,
+          calendarId: calendarId,
+          resource: {summary: appointment_type +' Appointment', description: appointment_type,
+            start: {dateTime: dateTimeStart},
+            end: {dateTime: dateTimeEnd}}
+        }, (err, event) => {
+          err ? reject(err) : resolve(event);
+        }
+        );
+      }
+    });
+  });
+}
